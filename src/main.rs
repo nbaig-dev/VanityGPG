@@ -65,6 +65,7 @@ const COUNTER_THRESHOLD: usize = 133331; // Just a random number
 #[derive(ValueEnum, Clone, Debug)]
 enum CipherSuiteValues {
     Ed25519,
+    Cv25519,
     RSA2048,
     RSA3072,
     RSA4096,
@@ -202,6 +203,7 @@ impl From<&CipherSuiteValues> for CipherSuite {
     fn from(value: &CipherSuiteValues) -> Self {
         match &value {
             CipherSuiteValues::Ed25519 => CipherSuite::Curve25519,
+            CipherSuiteValues::Cv25519 => CipherSuite::Curve25519,
             CipherSuiteValues::RSA2048 => CipherSuite::RSA2048,
             CipherSuiteValues::RSA3072 => CipherSuite::RSA3072,
             CipherSuiteValues::RSA4096 => CipherSuite::RSA4096,
@@ -276,14 +278,19 @@ impl<B: Backend> Key<B> {
         }
         let fingerprint = self.get_fingerprint();
         info!("saving [{}]", &fingerprint);
+        // PATCH NOTE: get_armored_results always returns an error so we return early
         let armored_keys = self.backend.get_armored_results(user_id)?;
         save_file(
-            format!("{}-private.asc", &fingerprint),
+            format!("./keys/{}-private.asc", &fingerprint),
             armored_keys.get_private_key(),
         )?;
         save_file(
-            format!("{}-public.asc", &fingerprint),
+            format!("./keys/{}-public.asc", &fingerprint),
             armored_keys.get_public_key(),
+        )?;
+        save_file(
+            format!("./keys/{}-public.asc", &fingerprint),
+            armored_keys.get_cert(),
         )?;
         Ok(())
     }

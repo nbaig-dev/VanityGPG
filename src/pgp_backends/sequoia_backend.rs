@@ -10,11 +10,12 @@ use sequoia_openpgp::packet::key::{Key4, PrimaryRole, SecretParts};
 use sequoia_openpgp::packet::signature::SignatureBuilder;
 use sequoia_openpgp::packet::Key;
 use sequoia_openpgp::packet::UserID as SequoiaUserID;
-use sequoia_openpgp::serialize::{MarshalInto, SerializeInto};
+use sequoia_openpgp::serialize::{MarshalInto, SerializeInto, Serialize};
 use sequoia_openpgp::types::{
     Curve as SequoiaCurve, Features, HashAlgorithm, KeyFlags, SignatureType, SymmetricAlgorithm,
 };
 use sequoia_openpgp::{Cert, Packet};
+use sequoia_openpgp::cert::CertBuilder;
 
 use super::{
     sha1_to_hex, Algorithms, ArmoredKey, Backend, CipherSuite, Curve, PGPError, Rsa,
@@ -24,6 +25,7 @@ use super::{
 use std::io::Write;
 use std::time::Duration;
 use std::time::UNIX_EPOCH;
+use std::fs::File;
 
 /// The `Sequoia-OpenPGP` backend wrapper
 #[derive(Debug)]
@@ -83,6 +85,9 @@ impl Backend for SequoiaBackend {
         let mut signer = self.primary_key.clone().into_keypair()?;
         let primary_key_packet = Key::V4(self.primary_key);
 
+        // PATCH NOTE: SignatureBuilder::new returns an error causing get_armored_results to return early
+        // So, key files are never created...
+        // FIXME
         // Direct key signature and the secret key
         let direct_key_signature = SignatureBuilder::new(SignatureType::DirectKey)
             .set_hash_algo(HashAlgorithm::SHA512)
@@ -141,7 +146,7 @@ impl Backend for SequoiaBackend {
             let armored_private_key =
                 String::from_utf8_lossy(&private_key_writer.finalize()?).to_string();
 
-            Ok(ArmoredKey::new(armored_public_key, armored_private_key))
+            Ok(ArmoredKey::new(armored_public_key, armored_private_key, cert.to_string()))
         } else {
             Err(PGPError::InvalidKeyGenerated.into())
         }
