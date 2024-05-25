@@ -97,6 +97,7 @@ pub struct UserID {
 pub struct ArmoredKey {
     public: String,
     private: String,
+    cert:String,
 }
 
 /// Backend adaptor trait
@@ -196,10 +197,11 @@ impl UserID {
 
 impl ArmoredKey {
     /// Create new instance
-    pub fn new<S: Into<String>>(public: S, private: S) -> Self {
+    pub fn new<S: Into<String>>(public: S, private: S, cert: S) -> Self {
         Self {
             public: public.into(),
             private: private.into(),
+            cert: cert.into(),
         }
     }
 
@@ -211,5 +213,10 @@ impl ArmoredKey {
     /// Get a reference to the private key
     pub fn get_private_key(&self) -> &str {
         &self.private
+    }
+
+    /// Get a reference to the private key
+    pub fn get_cert(&self) -> &str {
+        &self.cert
     }
 }

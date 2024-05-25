@@ -1,10 +1,18 @@
-VanityGPG (vanity_gpg)
+VanityGPG with Encrpytion Subkey Support
 ======================
 
 [![license](https://img.shields.io/github/license/RedL0tus/VanityGPG.svg)](LICENSE)
 [![crates.io](http://meritbadge.herokuapp.com/vanity_gpg)](https://crates.io/crates/vanity_gpg)
 
 A simple tool for generating and filtering vanity GPG keys (a.k.a. A OpenPGP key fingerprint collision tool), c0nCurr3nt1Y.
+
+**This VanityGPG fork adds support for generating a vanity encryption subkey (Cv25519) that you can add on to your master key (Ed25519).**
+
+Example Usage: `vanity_gpg --cipher-suite cv25519 --pattern '^ABC' `
+
+See the [vanity-pgp-subkey-tools repo](https://github.com/ElliotKillick/vanity-pgp-subkey-tools) for instructions on attaching your new vanity subkey to a master key.
+
+This VanityGPG fork only supports generating the Cv25519 subkey key necessary for encryption with a modern Ed25519 master key. Using this fork to generate other key types is unsupported.
 
 Install
 -------
